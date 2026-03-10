@@ -1,0 +1,43 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: ./venv/bin/python src/prepare.py --input_path 
+      data/raw/House_Rent_10M_balanced_40cities.csv --output_dir data/prepared 
+      --nrows 100000
+    deps:
+    - path: data/raw/House_Rent_10M_balanced_40cities.csv
+      hash: md5
+      md5: 04a2335c7d615996b6e266dcbe991501
+      size: 1303141128
+    - path: src/prepare.py
+      hash: md5
+      md5: 04b85b120efe2234a2e3430f996a667f
+      size: 2403
+    outs:
+    - path: data/prepared
+      hash: md5
+      md5: 56125f0274f4f5e3a23d9f8d31573a0f.dir
+      size: 137054230
+      nfiles: 2
+  train:
+    cmd: ./venv/bin/python src/train.py --train_path data/prepared/train.csv 
+      --test_path data/prepared/test.csv --model_type XGBoost --max_depth 10 
+      --n_estimators 50
+    deps:
+    - path: data/prepared/test.csv
+      hash: md5
+      md5: 3468aa1c1bafe27b12f7b3d75bb7e874
+      size: 27413227
+    - path: data/prepared/train.csv
+      hash: md5
+      md5: 279fca88bcb20e579504db7e5b20feb5
+      size: 109641003
+    - path: src/train.py
+      hash: md5
+      md5: 53eca870c57c7b1e24e2f098df7168ae
+      size: 4665
+    outs:
+    - path: feature_importance_XGBoost.png
+      hash: md5
+      md5: 45082691ed1080ea8a34fa83f97d9caa
+      size: 32273

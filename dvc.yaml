@@ -1,0 +1,17 @@
+stages:
+  prepare:
+    cmd: ./venv/bin/python src/prepare.py --input_path data/raw/House_Rent_10M_balanced_40cities.csv --output_dir data/prepared --nrows 100000
+    deps:
+      - src/prepare.py
+      - data/raw/House_Rent_10M_balanced_40cities.csv
+    outs:
+      - data/prepared
+
+  train:
+    cmd: ./venv/bin/python src/train.py --train_path data/prepared/train.csv --test_path data/prepared/test.csv --model_type XGBoost --max_depth 10 --n_estimators 50
+    deps:
+      - src/train.py
+      - data/prepared/train.csv
+      - data/prepared/test.csv
+    outs:
+      - feature_importance_XGBoost.png

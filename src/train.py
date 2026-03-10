@@ -5,44 +5,26 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import mlflow
 import mlflow.sklearn
-from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 def main(args):
-    print(f"Loading data from: {args.data_path}")
-    df = pd.read_csv(args.data_path, nrows=args.nrows)
+    print(f"Loading prepared data from: {args.train_path} and {args.test_path}")
+    train_df = pd.read_csv(args.train_path)
+    test_df = pd.read_csv(args.test_path)
     
     target_col = 'Rent'
 
-    print("Preprocessing data...")
-    X = df.drop(columns=[target_col])
-    y = df[target_col]
-
-    # Drop high-cardinality columns to optimize memory usage
-    cols_to_drop = ['Property ID', 'Area Locality', 'Posted On']
-    X = X.drop(columns=[c for c in cols_to_drop if c in X.columns], errors='ignore')
-
-    # Impute missing values
-    num_cols = X.select_dtypes(include=['int64', 'float64']).columns
-    X[num_cols] = X[num_cols].fillna(X[num_cols].median())
-
-    cat_cols = X.select_dtypes(include=['object', 'category']).columns
-    for col in cat_cols:
-        X[col] = X[col].fillna(X[col].mode()[0])
-
-    # One-hot encode categorical features
-    X = pd.get_dummies(X, columns=cat_cols, drop_first=True)
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=args.random_state
-    )
+    # Separate features and target
+    X_train = train_df.drop(columns=[target_col])
+    y_train = train_df[target_col]
+    X_test = test_df.drop(columns=[target_col])
+    y_test = test_df[target_col]
 
     mlflow.set_experiment("House_Rent_Prediction_Lab1")
 
     print(f"Training {args.model_type} with n_estimators={args.n_estimators}, max_depth={args.max_depth}...")
-
     run_name = f"{args.model_type}_CLI_Run"
     
     with mlflow.start_run(run_name=run_name):
@@ -50,7 +32,7 @@ def main(args):
         # Set MLflow tags
         mlflow.set_tag("author", "yura")
         mlflow.set_tag("model_type", args.model_type)
-        mlflow.set_tag("dataset_version", "10M_balanced_subset")
+        mlflow.set_tag("dataset_version", "prepared_split")
         
         # Initialize model
         if args.model_type == "RandomForest":
@@ -87,8 +69,7 @@ def main(args):
             "n_estimators": args.n_estimators,
             "max_depth": args.max_depth,
             "random_state": args.random_state,
-            "n_jobs": args.n_jobs,
-            "sample_size_rows": args.nrows
+            "n_jobs": args.n_jobs
         }
         
         if args.model_type == "XGBoost":
@@ -99,7 +80,7 @@ def main(args):
         mlflow.sklearn.log_model(model, f"{args.model_type.lower()}_model")
         
         # Generate and log feature importance plot
-        feature_importances = pd.Series(model.feature_importances_, index=X.columns).sort_values(ascending=False)[:10]
+        feature_importances = pd.Series(model.feature_importances_, index=X_train.columns).sort_values(ascending=False)[:10]
         
         plt.figure(figsize=(10, 6))
         sns.barplot(x=feature_importances.values, y=feature_importances.index, palette="viridis")
@@ -117,11 +98,11 @@ def main(args):
     print(f"Training and logging for {args.model_type} completed successfully.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Train a Regression Model for House Rent Prediction.")
+    parser = argparse.ArgumentParser(description="Model Training Pipeline")
     
-    # Data parameters
-    parser.add_argument("--data_path", type=str, required=True, help="Path to the raw CSV data file")
-    parser.add_argument("--nrows", type=int, default=50000, help="Number of rows to read from the dataset")
+    # Data paths
+    parser.add_argument("--train_path", type=str, required=True, help="Path to prepared train.csv")
+    parser.add_argument("--test_path", type=str, required=True, help="Path to prepared test.csv")
     
     # Model parameters
     parser.add_argument("--model_type", type=str, choices=["RandomForest", "XGBoost"], default="RandomForest", help="Algorithm selection")
