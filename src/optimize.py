@@ -1,5 +1,7 @@
 import os
 import joblib
+import json
+import logging
 import mlflow
 import mlflow.sklearn
 import numpy as np
@@ -10,6 +12,8 @@ from omegaconf import DictConfig, OmegaConf
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error, r2_score
+
+logging.getLogger("mlflow").setLevel(logging.WARNING)
 
 def load_processed_data(train_path: str, test_path: str, target_col: str):
     print(f"Loading data from {train_path} and {test_path}...")
@@ -98,6 +102,9 @@ def main(cfg: DictConfig):
         
         mlflow.log_metric(f"best_{cfg.hpo.metric}", best_trial.value)
         mlflow.log_dict(best_trial.params, "best_params.json")
+        
+        with open("best_params.json", "w", encoding="utf-8") as f:
+            json.dump(best_trial.params, f, indent=4)
         
         best_model = build_model(cfg.model.type, best_trial.params, cfg.seed)
         evaluate(best_model, X_train, y_train, X_test, y_test)

@@ -7,6 +7,17 @@ stages:
     outs:
       - data/prepared
 
+  optimize:
+    cmd: ./venv/bin/python src/optimize.py
+    deps:
+      - src/optimize.py
+      - data/prepared/train.csv
+      - data/prepared/test.csv
+      - config/config.yaml
+    outs:
+      - best_params.json
+      - models/best_xgboost.pkl
+
   train:
     cmd: ./venv/bin/python src/train.py --train_path data/prepared/train.csv --test_path data/prepared/test.csv --model_type XGBoost --max_depth 10 --n_estimators 50
     deps:
@@ -15,3 +26,5 @@ stages:
       - data/prepared/test.csv
     outs:
       - feature_importance_XGBoost.png
+      - model.pkl
+      - metrics.json

@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import mlflow
 import mlflow.sklearn
+import json
+import joblib
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
@@ -94,6 +96,19 @@ def main(args):
         plt.close() 
         
         mlflow.log_artifact(plot_filename)
+        
+        metrics_dict = {
+            "rmse": float(rmse), 
+            "mae": float(mae), 
+            "r2": float(r2)
+        }
+        with open("metrics.json", "w", encoding="utf-8") as f:
+            json.dump(metrics_dict, f, ensure_ascii=False, indent=2)
+            
+        joblib.dump(model, "model.pkl")
+        
+        print(f"Artifacts (model.pkl, metrics.json, {plot_filename}) saveds for CI/CD!")
+        # ---------------------------------------
         
     print(f"Training and logging for {args.model_type} completed successfully.")
 

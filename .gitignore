@@ -7,4 +7,7 @@ models/
 mlruns/
 .trash/
 /feature_importance_XGBoost.png
-data/
+data/prepared
+/best_params.json
+/model.pkl
+/metrics.json

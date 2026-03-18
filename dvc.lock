@@ -34,10 +34,46 @@ stages:
       size: 109641003
     - path: src/train.py
       hash: md5
-      md5: 53eca870c57c7b1e24e2f098df7168ae
-      size: 4665
+      md5: 80cf7c130078de809f1aacf3decadfd3
+      size: 5162
     outs:
     - path: feature_importance_XGBoost.png
       hash: md5
       md5: 45082691ed1080ea8a34fa83f97d9caa
       size: 32273
+    - path: metrics.json
+      hash: md5
+      md5: 85e8a050396fa5e10d6359f7081e6f04
+      size: 86
+    - path: model.pkl
+      hash: md5
+      md5: 3c03ad366e9b2684866e25581ec8837e
+      size: 1426416
+  optimize:
+    cmd: ./venv/bin/python src/optimize.py
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 45b0523007651969b1fd1acb38c6421d
+      size: 716
+    - path: data/prepared/test.csv
+      hash: md5
+      md5: 3468aa1c1bafe27b12f7b3d75bb7e874
+      size: 27413227
+    - path: data/prepared/train.csv
+      hash: md5
+      md5: 279fca88bcb20e579504db7e5b20feb5
+      size: 109641003
+    - path: src/optimize.py
+      hash: md5
+      md5: c55ad0d795244ff935e3c4aa31e22fd6
+      size: 5295
+    outs:
+    - path: best_params.json
+      hash: md5
+      md5: fcc1480592c87e465af91efe6c91350f
+      size: 88
+    - path: models/best_xgboost.pkl
+      hash: md5
+      md5: 804352afa3c853e47ed230074df3ad29
+      size: 872469
