@@ -1,0 +1,36 @@
+seed: 42
+
+mlflow:
+  tracking_uri: "http://127.0.0.1:5000"
+  experiment_name: "House_Rent_Prediction_Lab1"
+  log_model: true
+
+data:
+  train_path: "data/prepared/train.csv"
+  test_path: "data/prepared/test.csv"
+  target_col: "Rent"
+
+model:
+  type: "XGBoost"
+
+hpo:
+  n_trials: 20
+  sampler: "tpe"
+  metric: "rmse"
+  direction: "minimize"
+
+  random_forest:
+    n_estimators: { low: 50, high: 200, step: 50 }
+    max_depth: { low: 5, high: 25 }
+    min_samples_split: { low: 2, high: 10 }
+    min_samples_leaf: { low: 1, high: 5 }
+
+  xgboost:
+    n_estimators: { low: 50, high: 200, step: 50 }
+    max_depth: { low: 5, high: 20 }
+    learning_rate: { low: 0.01, high: 0.2 }
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null
