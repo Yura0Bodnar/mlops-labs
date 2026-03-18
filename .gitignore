@@ -7,3 +7,4 @@ models/
 mlruns/
 .trash/
 /feature_importance_XGBoost.png
+data/
