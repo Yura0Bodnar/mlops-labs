@@ -1,0 +1,68 @@
+# .github/workflows/cml.yaml
+name: Model CI (Train, Test, Report)
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Setup CML
+        uses: iterative/setup-cml@v2
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          
+          pip install "pathspec<0.12.1"
+          
+          pip install -r requirements.txt
+          pip install flake8 black pytest
+
+      - name: Lint (flake8)
+        run: |
+          flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Train model
+        run: |
+          python src/train.py --train_path data/ci_data/train.csv --test_path data/ci_data/test.csv --model_type XGBoost --max_depth 5 --n_estimators 10
+      
+      - name: Run tests (incl. Quality Gate)
+        env:
+          RMSE_THRESHOLD: "10000.0"
+          R2_THRESHOLD: "0.25"
+          DATA_PATH: "data/ci_data/train.csv"
+        run: |
+          pytest tests/test_model.py -q
+
+      - name: Create CML report (PR only)
+        if: github.event_name == 'pull_request'
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## Model Metrics" > report.md
+          cat metrics.json >> report.md
+          echo "" >> report.md
+          echo "## Visualization" >> report.md
+          
+          cml publish feature_importance_*.png --md >> report.md
+          
+          echo "" >> report.md
+          echo "### Quality Gate" >> report.md
+          echo "RMSE threshold: $RMSE_THRESHOLD" >> report.md
+          echo "R2 threshold: $R2_THRESHOLD" >> report.md
+          cml comment create report.md

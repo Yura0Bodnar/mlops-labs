@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+venv/
+.env
+models/
+.ipynb_checkpoints
+mlruns/
+.trash/
+/feature_importance_XGBoost.png
+data/prepared
+/best_params.json
+/model.pkl
+/metrics.json
+mlflow.db
