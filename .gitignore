@@ -11,3 +11,4 @@ data/prepared
 /best_params.json
 /model.pkl
 /metrics.json
+mlflow.db
