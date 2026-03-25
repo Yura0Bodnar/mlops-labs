@@ -3,3 +3,4 @@ outs:
   size: 1303141128
   hash: md5
   path: House_Rent_10M_balanced_40cities.csv
+  isexec: true
