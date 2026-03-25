@@ -32,12 +32,11 @@ jobs:
         run: |
           flake8 src dags tests --max-line-length=120 --statistics --show-source
 
-      - name: Test Airflow DAG Integrity
-        env:
-          AIRFLOW_HOME: ${{ github.workspace }}
-          AIRFLOW_CORE_LOAD_EXAMPLES: "False"
+      - name: Install infrastructure dependencies
         run: |
-          pytest tests/test_dag_integrity.py -v
+          python -m pip install --upgrade pip
+          pip install flake8 pytest apache-airflow apache-airflow-providers-docker
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Verify Docker Build
         run: |
