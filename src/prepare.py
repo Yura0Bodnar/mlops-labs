@@ -30,9 +30,7 @@ def main(args):
     X = pd.get_dummies(X, columns=cat_cols, drop_first=True)
 
     # Perform train-test split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=args.test_size, random_state=args.random_state
-    )
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=args.test_size, random_state=args.random_state)
 
     # Recombine features and target for saving
     train_df = pd.concat([X_train, y_train], axis=1)
@@ -54,24 +52,16 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Data Preparation Pipeline")
 
-    parser.add_argument(
-        "--input_path", type=str, required=True, help="Path to raw CSV data"
-    )
-    parser.add_argument(
-        "--output_dir", type=str, required=True, help="Directory to save prepared data"
-    )
-    parser.add_argument(
-        "--nrows", type=int, default=50000, help="Number of rows to load"
-    )
+    parser.add_argument("--input_path", type=str, required=True, help="Path to raw CSV data")
+    parser.add_argument("--output_dir", type=str, required=True, help="Directory to save prepared data")
+    parser.add_argument("--nrows", type=int, default=50000, help="Number of rows to load")
     parser.add_argument(
         "--test_size",
         type=float,
         default=0.2,
         help="Proportion of the dataset to include in the test split",
     )
-    parser.add_argument(
-        "--random_state", type=int, default=42, help="Random state for reproducibility"
-    )
+    parser.add_argument("--random_state", type=int, default=42, help="Random state for reproducibility")
 
     args = parser.parse_args()
     main(args)

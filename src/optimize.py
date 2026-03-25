@@ -56,9 +56,7 @@ def suggest_params(trial: optuna.Trial, cfg: DictConfig):
                 space.n_estimators.high,
                 step=space.n_estimators.step,
             ),
-            "max_depth": trial.suggest_int(
-                "max_depth", space.max_depth.low, space.max_depth.high
-            ),
+            "max_depth": trial.suggest_int("max_depth", space.max_depth.low, space.max_depth.high),
             "min_samples_split": trial.suggest_int(
                 "min_samples_split",
                 space.min_samples_split.low,
@@ -79,9 +77,7 @@ def suggest_params(trial: optuna.Trial, cfg: DictConfig):
                 space.n_estimators.high,
                 step=space.n_estimators.step,
             ),
-            "max_depth": trial.suggest_int(
-                "max_depth", space.max_depth.low, space.max_depth.high
-            ),
+            "max_depth": trial.suggest_int("max_depth", space.max_depth.low, space.max_depth.high),
             "learning_rate": trial.suggest_float(
                 "learning_rate",
                 space.learning_rate.low,
@@ -117,25 +113,17 @@ def main(cfg: DictConfig):
     mlflow.set_tracking_uri(cfg.mlflow.tracking_uri)
     mlflow.set_experiment(cfg.mlflow.experiment_name)
 
-    X_train, X_test, y_train, y_test = load_processed_data(
-        cfg.data.train_path, cfg.data.test_path, cfg.data.target_col
-    )
+    X_train, X_test, y_train, y_test = load_processed_data(cfg.data.train_path, cfg.data.test_path, cfg.data.target_col)
 
-    with mlflow.start_run(
-        run_name=f"HPO_{cfg.model.type}_{cfg.hpo.sampler}"
-    ) as parent_run:
-        mlflow.log_dict(
-            OmegaConf.to_container(cfg, resolve=True), "config_resolved.json"
-        )
+    with mlflow.start_run(run_name=f"HPO_{cfg.model.type}_{cfg.hpo.sampler}"):
+        mlflow.log_dict(OmegaConf.to_container(cfg, resolve=True), "config_resolved.json")
 
         sampler = optuna.samplers.TPESampler(seed=cfg.seed)
         study = optuna.create_study(direction=cfg.hpo.direction, sampler=sampler)
 
         objective = objective_factory(cfg, X_train, X_test, y_train, y_test)
 
-        print(
-            f"Starting optimization for {cfg.model.type} ({cfg.hpo.n_trials} trials)..."
-        )
+        print(f"Starting optimization for {cfg.model.type} ({cfg.hpo.n_trials} trials)...")
         study.optimize(objective, n_trials=cfg.hpo.n_trials)
 
         best_trial = study.best_trial
@@ -157,7 +145,7 @@ def main(cfg: DictConfig):
 
         if cfg.mlflow.log_model:
             mlflow.sklearn.log_model(best_model, artifact_path="model")
-            print(f"Final model saved and logged to MLflow.")
+            print("Final model saved and logged to MLflow.")
 
 
 if __name__ == "__main__":

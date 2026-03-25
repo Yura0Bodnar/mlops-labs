@@ -27,9 +27,7 @@ def main(args):
 
     mlflow.set_experiment("House_Rent_Prediction_Lab1")
 
-    print(
-        f"Training {args.model_type} with n_estimators={args.n_estimators}, max_depth={args.max_depth}..."
-    )
+    print(f"Training {args.model_type} with n_estimators={args.n_estimators}, max_depth={args.max_depth}...")
     run_name = f"{args.model_type}_CLI_Run"
 
     with mlflow.start_run(run_name=run_name):
@@ -85,14 +83,12 @@ def main(args):
         mlflow.sklearn.log_model(model, f"{args.model_type.lower()}_model")
 
         # Generate and log feature importance plot
-        feature_importances = pd.Series(
-            model.feature_importances_, index=X_train.columns
-        ).sort_values(ascending=False)[:10]
+        feature_importances = pd.Series(model.feature_importances_, index=X_train.columns).sort_values(ascending=False)[
+            :10
+        ]
 
         plt.figure(figsize=(10, 6))
-        sns.barplot(
-            x=feature_importances.values, y=feature_importances.index, palette="viridis"
-        )
+        sns.barplot(x=feature_importances.values, y=feature_importances.index, palette="viridis")
         plt.title(f"Top 10 Feature Importances ({args.model_type})")
         plt.xlabel("Importance")
         plt.ylabel("Feature")
@@ -120,12 +116,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Model Training Pipeline")
 
     # Data paths
-    parser.add_argument(
-        "--train_path", type=str, required=True, help="Path to prepared train.csv"
-    )
-    parser.add_argument(
-        "--test_path", type=str, required=True, help="Path to prepared test.csv"
-    )
+    parser.add_argument("--train_path", type=str, required=True, help="Path to prepared train.csv")
+    parser.add_argument("--test_path", type=str, required=True, help="Path to prepared test.csv")
 
     # Model parameters
     parser.add_argument(
@@ -142,17 +134,11 @@ if __name__ == "__main__":
         help="Number of boosting rounds or trees",
     )
     parser.add_argument("--max_depth", type=int, default=10, help="Maximum tree depth")
-    parser.add_argument(
-        "--learning_rate", type=float, default=0.1, help="Learning rate (XGBoost only)"
-    )
+    parser.add_argument("--learning_rate", type=float, default=0.1, help="Learning rate (XGBoost only)")
 
     # Execution parameters
-    parser.add_argument(
-        "--random_state", type=int, default=42, help="Seed for reproducibility"
-    )
-    parser.add_argument(
-        "--n_jobs", type=int, default=2, help="Number of parallel threads"
-    )
+    parser.add_argument("--random_state", type=int, default=42, help="Seed for reproducibility")
+    parser.add_argument("--n_jobs", type=int, default=2, help="Number of parallel threads")
 
     args = parser.parse_args()
     main(args)

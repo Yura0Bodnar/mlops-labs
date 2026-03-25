@@ -25,9 +25,7 @@ def test_data_schema_basic():
 
     assert not missing_cols, f"Missing required columns: {sorted(missing_cols)}"
     assert df["Rent"].notna().all(), "Target column 'Rent' contains NaN values."
-    assert (
-        df.shape[0] >= 50
-    ), f"Insufficient data points for training: {df.shape[0]} rows."
+    assert df.shape[0] >= 50, f"Insufficient data points for training: {df.shape[0]} rows."
 
 
 def test_artifacts_exist():
