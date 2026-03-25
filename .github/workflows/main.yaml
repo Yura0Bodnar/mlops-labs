@@ -1,0 +1,44 @@
+name: Infrastructure CI (Lint, DAGs, Docker)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  infrastructure-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install infrastructure dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest apache-airflow
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Lint Python code (flake8)
+        run: |
+          flake8 src dags tests --max-line-length=120 --statistics --show-source
+
+      - name: Test Airflow DAG Integrity
+        env:
+          AIRFLOW_HOME: ${{ github.workspace }}
+          AIRFLOW_CORE_LOAD_EXAMPLES: "False"
+        run: |
+          pytest tests/test_dag_integrity.py -v
+
+      - name: Verify Docker Build
+        run: |
+          docker build -t ml-pipeline:ci-test .
